@@ -23,6 +23,23 @@ public class Rocket : MonoBehaviour {
         Rotate();
     }
 
+    void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                // do nothing
+                print("OK"); // todo remove
+                break;
+            case "Fuel":
+                print("Fuel"); // todo remove
+                break;
+            default:
+                print("Dead"); // Kill player | Reload level
+                break;
+        }
+    }
+
     private void Thrust()
     {
 
