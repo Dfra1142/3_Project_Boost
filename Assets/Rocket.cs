@@ -3,40 +3,55 @@ using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour {
 
-    // TODO Fix Lighting Bug
     [SerializeField]float rcsThrust = 200f;
     [SerializeField] float MainThrust = 50f;
-
     Rigidbody rigidBody;
     AudioSource audioSource;
+    enum State { Alive, Dying, Transcending }
+    State state = State.Alive;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start ()
+    {
         rigidBody = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
 	}
 	
 	// Update is called once per frame
-	void Update () {
-        Thrust();
-        Rotate();
+	void Update ()
+    {
+        if (state == State.Alive) { Thrust(); Rotate(); } else { audioSource.Stop(); }
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        if (state != State.Alive) { return; } // ignore collisions
+
         switch (collision.gameObject.tag)
         {
             case "Friendly":
+                // do nothing
                 break;
             case "Finish":
-                print("Hit finish"); //todo remove
-                SceneManager.LoadScene(1);
+                state = State.Transcending;
+                Invoke("LoadNextLevel", 1f); // parameterise time
                 break;
             default:
-                print("Dead"); // Kill player | Reload level
-                SceneManager.LoadScene(0);
+                print("Hit something deadly");
+                state = State.Dying;
+                Invoke("LoadFirstLevel", 1f); // parameterise time
                 break;
         }
+    }
+
+    private void LoadFirstLevel()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    private void LoadNextLevel()
+    {
+        SceneManager.LoadScene(1); // todo allow for more than 2 levels
     }
 
     private void Thrust()
